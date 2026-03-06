@@ -1,0 +1,7 @@
+[project]
+name = "difflow"
+version = "0.1.0"
+description = "library for diffusion and flow matching models"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
