@@ -33,7 +33,7 @@ class DDPM(nn.Module):
         # equally spaced beta between the specified range
         self.beta = torch.linspace(beta_start, beta_end, steps, device=device)
         # converting into (1 - beta**2) ** 0.5
-        self.alpha = torch.sqrt(1 - torch.square(self.beta)).to(device)
+        self.alpha = (1 - self.beta).to(device)
         
         # cum alpha is a tensor containing the cumulative product of the alpha tensor
         self.cum_alpha = torch.cumprod(self.alpha, dim=0).to(device)
@@ -41,27 +41,26 @@ class DDPM(nn.Module):
         self.device = device
         
     def forward(self, x: Tensor, t: Tensor):
-        alpha = self.cum_alpha[t].reshape(x.shape[0], 1, 1, 1)
-        noise = torch.randn_like(x, device=self.device)
+        cum_alpha = self.cum_alpha[t].reshape(x.shape[0], 1, 1, 1)
+        noise = torch.randn_like(x)
         
-        x = alpha * x + torch.sqrt(1 - torch.square(alpha)) * noise
+        x = torch.sqrt(cum_alpha) * x + torch.sqrt(1 - cum_alpha) * noise
         return x, noise
     
     def reverse(self, x: Tensor, t: int):
         t_batch = torch.full((x.shape[0],), t, device=self.device)
-        pred_noise = self.noise_model.forward(x, t_batch).to(self.device)
+        pred_noise = self.noise_model(x, t_batch)
         
         alpha = self.alpha[t].reshape(1, 1, 1, 1)
         cum_alpha = self.cum_alpha[t].reshape(1, 1, 1, 1)
         
-        mu_i = ((x - ((1 - torch.square(alpha))/torch.sqrt(1 - torch.square(cum_alpha))) *  pred_noise) / alpha).to(self.device)
+        mu = (1 / torch.sqrt(alpha)) * (x - (1 - alpha) / torch.sqrt(1 - cum_alpha) * pred_noise)
         
-        if t == 0: return mu_i
+        if t == 0: return mu
         
-        noise = torch.randn_like(x).to(self.device)
-        sigma_i = self.beta[t] * noise
-
-        return mu_i + sigma_i
+        sigma = torch.sqrt(self.beta[t]) * torch.randn_like(x)
+        
+        return mu + sigma
     
     def sample(self, shape: Tuple):
         x = torch.randn(shape, device=self.device)
