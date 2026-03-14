@@ -28,10 +28,10 @@ class DDPMTrainer(Trainer):
     def loss(self, noise: Tensor, pred_noise: Tensor):
         return self.criterion(noise, pred_noise)
     
-    def train(self, data: DataLoader):
+    def train(self, data: DataLoader, start_epoch: int = 0):
         losses = []
         
-        for epoch in range(1, self.epochs+1):
+        for epoch in range(start_epoch+1, self.epochs+1):
             epoch_loss = []
             for batch, _ in data:
                 batch = batch.to(self.device)
