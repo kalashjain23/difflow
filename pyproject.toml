@@ -4,4 +4,8 @@ version = "0.1.0"
 description = "library for diffusion and flow matching models"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = []
+dependencies = [
+    "einops>=0.8.2",
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+]
