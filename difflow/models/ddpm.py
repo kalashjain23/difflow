@@ -15,7 +15,7 @@ class DDPM(nn.Module):
         in_channels: int = 3,
         noise_model_channels: int = 128,
         num_resnet: int = 2,
-        attention_channels: Tuple[int] = (16,),
+        attention_channels: Tuple[int] = (256,),
         channel_mult: Tuple[int] = (1, 2, 2, 2),
         time_emb_dim: int = 128,
         num_groups: int = 32,
