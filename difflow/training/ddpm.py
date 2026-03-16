@@ -12,6 +12,7 @@ class DDPMTrainer(Trainer):
         batch_size: int,
         epochs: int,
         model: nn.Module,
+        checkpoint: int = 10,
         ema_decay: float = 0.9999,
     ):
         super().__init__()
@@ -20,6 +21,7 @@ class DDPMTrainer(Trainer):
         self.epochs = epochs
         self.model = model
         self.device = model.device
+        self.checkpoint = checkpoint
         
         self.criterion = nn.MSELoss()
         self.optimizer = Adam(model.parameters(), lr=2e-4)
@@ -53,7 +55,7 @@ class DDPMTrainer(Trainer):
             losses.append(avg_loss)
             print(f"epoch {epoch}, loss: {avg_loss:.4f}")
                 
-            if epoch % 10 == 0:
+            if epoch % self.checkpoint == 0:
                 torch.save({
                     'model': self.model.state_dict(),
                     'optimizer': self.optimizer.state_dict(),
