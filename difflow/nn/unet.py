@@ -5,7 +5,7 @@ import torch
 
 from .resnet import ResNet
 from .time_embedding import TimeEmbedding
-from .unet_attention import Attention
+from .unet_attention import UNetAttention
 
 
 class UNet(nn.Module):
@@ -38,7 +38,7 @@ class UNet(nn.Module):
             for _ in range(num_resnet):
                 self.encoder.append(ResNet(prev_channel, channel, time_emb_dim, num_groups, dropout))
                 if channel in attention_channels:
-                    self.encoder.append(Attention(num_groups, channel))
+                    self.encoder.append(UNetAttention(num_groups, channel))
                 
                 prev_channel = channel
                 
@@ -48,7 +48,7 @@ class UNet(nn.Module):
             
         self.neck = nn.ModuleList([
             ResNet(prev_channel, prev_channel, time_emb_dim, num_groups, dropout),
-            Attention(num_groups, prev_channel),
+            UNetAttention(num_groups, prev_channel),
             ResNet(prev_channel, prev_channel, time_emb_dim, num_groups, dropout)
         ])
         
@@ -69,7 +69,7 @@ class UNet(nn.Module):
                 in_ch = prev_channel + channel if (j == 0 and i != len(channel_mult) - 1) else channel
                 self.decoder.append(ResNet(in_ch, channel, time_emb_dim, num_groups, dropout))
                 if channel in attention_channels:
-                    self.decoder.append(Attention(num_groups, channel))
+                    self.decoder.append(UNetAttention(num_groups, channel))
                 
                 prev_channel = channel
                 
@@ -88,7 +88,7 @@ class UNet(nn.Module):
         for module in self.encoder:
             if isinstance(module, ResNet):
                 x = module(x, t_emb)
-            elif isinstance(module, Attention):
+            elif isinstance(module, UNetAttention):
                 x = module(x)
             else:
                 skips.append(x)
@@ -97,7 +97,7 @@ class UNet(nn.Module):
         for module in self.neck:
             if isinstance(module, ResNet):
                 x = module(x, t_emb)
-            elif isinstance(module, Attention):
+            elif isinstance(module, UNetAttention):
                 x = module(x)
             else:
                 x = module(x)
@@ -109,7 +109,7 @@ class UNet(nn.Module):
                     x = torch.cat([x, skips.pop()], dim=1)
                     is_first_resnet = False
                 x = module(x, t_emb)
-            elif isinstance(module, Attention):
+            elif isinstance(module, UNetAttention):
                 x = module(x)
             else:
                 x = module(x)

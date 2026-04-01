@@ -1,15 +1,15 @@
 from torch import Tensor, nn
-from .self_attention import SelfAttention
+from .attention import Attention
 from einops import rearrange
 
 
-class Attention(nn.Module):
+class UNetAttention(nn.Module):
     def __init__(self, num_groups: int, channels: int) -> None:
         super().__init__()
         
         self.num_groups = num_groups
         self.norm = nn.GroupNorm(num_groups=num_groups, num_channels=channels)
-        self.attention = SelfAttention(channels)
+        self.attention = Attention(channels)
         
     def forward(self, x: Tensor):
         B, C, H, W = x.shape
