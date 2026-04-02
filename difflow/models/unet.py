@@ -3,9 +3,9 @@ from typing import Tuple
 from torch import Tensor
 import torch
 
-from .resnet import ResNet
-from .time_embedding import TimeEmbedding
-from .unet_attention import UNetAttention
+from difflow.nn.resnet import ResNet
+from difflow.nn.time_embedding import TimeEmbedding
+from difflow.nn.unet_attention import UNetAttention
 
 
 class UNet(nn.Module):

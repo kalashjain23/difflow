@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import torch
-from difflow.training.ddpm import DDPMTrainer
+from difflow.training.ddpm_trainer import DDPMTrainer
 from difflow.models.ddpm import DDPM
 
 def get_cifar10(batch_size: int):
