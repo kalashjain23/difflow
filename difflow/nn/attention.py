@@ -37,7 +37,7 @@ class Attention(nn.Module):
         attn_weights = (q @ k.transpose(-1, -2))
         scaled_weights = attn_weights / ((self.dim // self.heads) ** 0.5)
         
-        # aplpy masking
+        # apply masking
         if mask is not None: scaled_weights += mask
         
         # apply softmax to convert them into probability distribution

@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 from .trainer import Trainer
-from difflow.nn.ema import EMA
+from difflow.nn import EMA
 from torch import nn, Tensor
 from torch.optim.adam import Adam
 import torch

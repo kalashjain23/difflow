@@ -1,19 +1,21 @@
 from torch import nn
 from torch import Tensor
 import torch
+from typing import Optional
 
 import math
 
 class TimeEmbedding(nn.Module):
-    def __init__(self, model_channels: int) -> None:
+    def __init__(self, model_channels: int, out_dim: Optional[int] = None) -> None:
         super().__init__()
         
         self.model_channels = model_channels
+        out_dim = out_dim if out_dim else model_channels * 4
         
         self.linear1 = nn.Linear(self.model_channels, self.model_channels * 4)
-        self.linear2 = nn.Linear(4 * self.model_channels, 4 * self.model_channels)
+        self.linear2 = nn.Linear(4 * self.model_channels, out_dim)
         
-    def _sinusoidal(self, t: Tensor) -> Tensor:
+    def sinusoidal(self, t: Tensor) -> Tensor:
         # t: (B,)
         half_dim = self.model_channels // 2
         
@@ -29,7 +31,7 @@ class TimeEmbedding(nn.Module):
         return embeddings
         
     def forward(self, t: Tensor) -> Tensor:
-        x = self._sinusoidal(t)
+        x = self.sinusoidal(t)
         x = self.linear1(x)
         x = torch.nn.functional.silu(x)
         x = self.linear2(x)

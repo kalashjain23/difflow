@@ -1,4 +1,4 @@
-from difflow.models.ddpm import DDPM
+from difflow.models import DDPM
 from torchvision.utils import save_image
 import torch
 
@@ -10,7 +10,7 @@ model = DDPM(
     beta_start=1e-4,
     beta_end=0.02,
 )
-model.load_state_dict(checkpoint['model'])
+model.load_state_dict(checkpoint['ema'])
 model.eval()
 
 n_samples = 4
