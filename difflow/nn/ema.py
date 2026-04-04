@@ -10,7 +10,7 @@ class EMA:
         self.decay = decay
     
     def update(self):
-        for name, param in self.model_weights.items():
+        for name, param in self.model.state_dict().items():
             if param.dtype.is_floating_point:
                 self.ema_weights[name] = self.decay * self.ema_weights[name] + (1 - self.decay) * param
             else:
