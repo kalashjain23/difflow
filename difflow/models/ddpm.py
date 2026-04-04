@@ -32,8 +32,8 @@ class DDPM(nn.Module):
         
         # equally spaced beta between the specified range
         self.beta = torch.linspace(beta_start, beta_end, steps, device=device)
-        # converting into (1 - beta**2) ** 0.5
-        self.alpha = torch.sqrt(1 - torch.square(self.beta)).to(device)
+        # alpha_t = 1 - beta_t
+        self.alpha = (1 - self.beta).to(device)
         
         # cum alpha is a tensor containing the cumulative product of the alpha tensor
         self.cum_alpha = torch.cumprod(self.alpha, dim=0).to(device)
@@ -44,7 +44,7 @@ class DDPM(nn.Module):
         cum_alpha = self.cum_alpha[t].reshape(x.shape[0], 1, 1, 1)
         noise = torch.randn_like(x)
         
-        x = cum_alpha * x + torch.sqrt(1 - torch.square(cum_alpha)) * noise
+        x = torch.sqrt(cum_alpha) * x + torch.sqrt(1 - cum_alpha) * noise
         return x, noise
     
     def reverse(self, x: Tensor, t: int):
@@ -54,7 +54,7 @@ class DDPM(nn.Module):
         alpha = self.alpha[t].reshape(1, 1, 1, 1)
         cum_alpha = self.cum_alpha[t].reshape(1, 1, 1, 1)
         
-        mu = ((1 / alpha) * (x - ((1 - torch.square(alpha))/torch.sqrt(1 - torch.square(cum_alpha))) *  pred_noise))
+        mu = (1 / torch.sqrt(alpha)) * (x - (1 - alpha) / torch.sqrt(1 - cum_alpha) * pred_noise)
         
         if t == 0: return mu
         
