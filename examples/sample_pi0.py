@@ -6,7 +6,7 @@ from transformers import AutoProcessor
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-checkpoint = torch.load("pi0_checkpoint_50.pth", map_location=device)
+checkpoint = torch.load("pi0_checkpoint_1.pth", map_location=device)
 
 chunk_size = 10
 action_dim = 7
@@ -30,6 +30,7 @@ with torch.no_grad():
         images=inputs["pixel_values"].to(device),
         prompt=inputs["input_ids"].to(device),
         states=torch.randn(1, state_dim).to(device),
+        token_type_ids=inputs["token_type_ids"].to(device),
     )
 
 print(f"sampled actions shape: {actions.shape}")

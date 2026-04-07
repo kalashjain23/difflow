@@ -34,10 +34,11 @@ class Pi0(nn.Module):
         self.action_out_proj = nn.Linear(embed_dim, action_dim)
         
         
-    def forward(self, images: Tensor, prompt: Tensor, states: Tensor, actions: Tensor, time: Tensor):
+    def forward(self, images: Tensor, prompt: Tensor, token_type_ids: Optional[Tensor], states: Tensor, actions: Tensor, time: Tensor):
         outputs = self.vlm(
             input_ids=prompt,
             pixel_values=images,
+            token_type_ids=token_type_ids,
             output_hidden_states=True
         )
         vlm_tokens = outputs.hidden_states[-1]
@@ -72,13 +73,13 @@ class Pi0(nn.Module):
         
         return self.action_out_proj(action_out)
             
-    def sample(self, action_size: Tuple, steps: int, images: Tensor, prompt: Tensor, states: Tensor):
+    def sample(self, action_size: Tuple, steps: int, images: Tensor, prompt: Tensor, states: Tensor, token_type_ids: Optional[Tensor] = None):
         action = torch.randn(action_size).to(self.device)
         dt = 1.0 / steps
 
         for i in range(steps):
             t_val = i / steps
             t = torch.full((action_size[0],), t_val, device=self.device)
-            action = action + self.forward(images, prompt, states, action, t) * dt
+            action = action + self.forward(images, prompt, token_type_ids, states, action, t) * dt
             
         return action

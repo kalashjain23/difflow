@@ -15,19 +15,22 @@ def dummy_dataset(processor, n_samples=16, state_dim=7, action_dim=7, chunk_size
     prompt = "<image> move arm forward"
     all_input_ids = []
     all_pixel_values = []
+    all_token_type_ids = []
 
     for _ in range(n_samples):
         img = Image.fromarray(np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8))
         inputs = processor(text=prompt, images=img, return_tensors="pt")
         all_input_ids.append(inputs["input_ids"].squeeze(0))
         all_pixel_values.append(inputs["pixel_values"].squeeze(0))
+        all_token_type_ids.append(inputs["token_type_ids"].squeeze(0))
 
     input_ids = torch.stack(all_input_ids)
     pixel_values = torch.stack(all_pixel_values)
+    token_type_ids = torch.stack(all_token_type_ids)
     states = torch.randn(n_samples, state_dim)
     actions = torch.randn(n_samples, chunk_size, action_dim)
 
-    return TensorDataset(pixel_values, input_ids, states, actions)
+    return TensorDataset(pixel_values, input_ids, token_type_ids, states, actions)
 
 
 if __name__ == '__main__':

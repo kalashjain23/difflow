@@ -38,9 +38,10 @@ class Pi0Trainer(Trainer):
         for epoch in range(start_epoch+1, self.epochs+1):
             epoch_loss = []
             for batch in data:
-                images, prompt, state, action = batch
+                images, prompt, token_type_ids, state, action = batch
                 images = images.to(self.device)
                 prompt = prompt.to(self.device)
+                token_type_ids = token_type_ids.to(self.device)
                 state = state.to(self.device)
                 action = action.to(self.device)
                 
@@ -52,7 +53,7 @@ class Pi0Trainer(Trainer):
                 
                 self.optimizer.zero_grad()
 
-                pred_v_field = self.model.forward(images, prompt, state, action_t, t.view(-1))
+                pred_v_field = self.model.forward(images, prompt, token_type_ids, state, action_t, t.view(-1))
                 v_field = action - action_0
                 
                 loss = self.loss(v_field, pred_v_field)
