@@ -43,7 +43,7 @@ if __name__ == '__main__':
     heads = 4
     n_layers = 2
     batch_size = 4
-    epochs = 2
+    epochs = 100
 
     processor = AutoProcessor.from_pretrained("google/paligemma-3b-pt-224")
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         batch_size=batch_size,
         epochs=epochs,
         model=model,
-        checkpoint=1,
+        checkpoint=50,
     )
 
     model.train()
