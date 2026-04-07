@@ -38,10 +38,14 @@ class Pi0Trainer(Trainer):
         for epoch in range(start_epoch+1, self.epochs+1):
             epoch_loss = []
             for batch in data:
-                images, prompt, token_type_ids, state, action = batch
+                if len(batch) == 5:
+                    images, prompt, token_type_ids, state, action = batch
+                    token_type_ids = token_type_ids.to(self.device)
+                else:
+                    images, prompt, state, action = batch
+                    token_type_ids = None
                 images = images.to(self.device)
                 prompt = prompt.to(self.device)
-                token_type_ids = token_type_ids.to(self.device)
                 state = state.to(self.device)
                 action = action.to(self.device)
                 
