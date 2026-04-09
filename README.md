@@ -28,15 +28,33 @@ If you're new to this, start with **Flow Matching** (simplest), then **DDPM**, t
 
 ### [DDPM](difflow/models/ddpm.py)
 
-DDPM (Denoising Diffusion Probabilistic Model) follows a forward noising process and a reverse denoising process. In the forward process, we add noise (Gaussian) to the data distribution at each time step. This ensures we are gradually reducing the signal from the data distribution and increasing the noise. In the manifold space, it helps in spreading out the complex data distribution to a smoother distribution (forward process ensures that the distribution in the end is close to Gaussian). While in the reverse process, we sample a noisy data point from complete noise and gradually try to denoise it to generate something meaningful. We train a model (here UNet) that predicts noise during the reverse process given a noisy sample and the timestep. You can imagine this as picking a data point in the high dimensional manifold space and moving towards the high density regions by reducing the noise. (Note: we also add some Gaussian noise while removing the noise to add stochasticity which allows the model to explore more and generate varying samples)
+DDPM (Denoising Diffusion Probabilistic Model) follows a forward noising process and a reverse denoising process. In the forward process, we add noise (Gaussian) to the data distribution at each time step. This ensures we are gradually reducing the signal from the data distribution and increasing the noise. In the manifold space, it helps in spreading out the complex data distribution to a smoother distribution (forward process ensures that the distribution in the end is Gaussian). While in the reverse process, we sample a noisy data point from complete noise and gradually try to denoise it to generate something meaningful. We train a model (here UNet) that predicts noise during the reverse process given a noisy sample and the timestep. You can imagine this as picking a data point in the high dimensional manifold space and moving towards the high density regions by reducing the noise. (Note: we also add some Gaussian noise while removing the noise to add stochasticity which allows the model to explore more and generate varying samples)
 
-### [Flow Matching](difflow/models/flow_matching.py) (2D dataset)
+<p align="center">
+  <img src="https://developer-blogs.nvidia.com/wp-content/uploads/2022/04/Generation-with-Diffusion-Models.png" width="600"/>
+  <br/>
+  <a href="https://developer.nvidia.com/blog/improving-diffusion-models-as-an-alternative-to-gans-part-2/">Source</a>
+</p>
 
-Flow Matching follows the simple concept of adding noise to the dataset via linear interpolation, that is, reduce signal while increasing noise (sounds similar to ddpm forward process right? well it is lol), and learn a velocity field that points towards the nearest high density regions. The idea is that if we take a random sample in the high dimensional space and use the learned velocity field to guide ourselves towards the high density regions where the data distribution actually exists. In this implementation, we have a small FFN (feed forward network) as the model learning the velocity field of a small 2D dataset. While training, we interpolate the data distribution and try to predict the velocity field using the model. The loss here becomes the L2 loss between the actual velocity field (pure signal sample - pure noise) and the predicted velocity field. Minimizing this gives us the learned velocity field that can guide us towards the high density regions (closer to the data distribution).
+### [Flow Matching](difflow/models/flow_matching.py) (2D data distribution)
+
+Flow Matching follows the simple concept of adding noise to the data distribution via linear interpolation, that is, reduce signal while increasing noise (sounds similar to ddpm forward process right? well it is lol), and learn a velocity field that points towards the nearest high density regions. The idea is that if we take a random sample in the high dimensional space and use the learned velocity field to guide ourselves towards the high density regions where the data distribution actually exists. In this implementation, we have a small FFN (feed forward network) as the model learning the velocity field of a small 2D dataset. While training, we interpolate the data distribution and try to predict the velocity field using the model. The loss here becomes the L2 loss between the actual velocity field (pure signal sample - pure noise) and the predicted velocity field. Minimizing this gives us the learned velocity field that can guide us towards the high density regions (closer to the data distribution). Notice, we are not adding additional noise while going from the low density region to high density region. Mathematically, this boils down to solving an ODE (ordinary differential equation) rather than a SDE (stochastic differential equation) used in diffusion models making it easier and faster to compute but less explorable.
+
+<p align="center">
+  <img src="https://miro.medium.com/v2/resize:fit:1400/format:webp/0*ORqSwispHnPjhNir" width="600"/>
+  <br/>
+  <a href="https://medium.com/@hasfuraa/flow-matching-and-diffusion-deep-dive-b080f7782654">Source</a>
+</p>
 
 ### [Pi0](difflow/models/pi0.py) (only the flow matching action expert head)
 
-This follows the same principle as the flow matching model above, but instead of sampling 2D points, we are now sampling 7 actions for each joint. The path is similar, sample a noisy vector of actions and pass it through the action head to get the final vector of actions. Now in the action head, we are passing the (joint state embeddings and the action embeddings) and (vlm tokens embeddings) through a transformer. We have 2 experts, one for the action and state and one for the vlm tokens. In the transformer, they share the same attention block with a blockwise causal mask where VLM tokens attend to themselves, state tokens attend to vlm tokens and themselves and action tokens attend to everything. This ensures actions are influenced by the images, prompts and the current robot joint states.
+This follows the same principle as the flow matching model above, but instead of sampling 2D points, we are now sampling actions for each joint of the robot. The path is similar, sample a noisy vector of actions and pass it through the action head to get the final vector of actions. Now in the action head, we are passing the (joint state embeddings and the action embeddings) and (vlm tokens embeddings) through a transformer. We have 2 experts, one for the action and state and one for the vlm tokens. In the transformer, they share the same attention block with a blockwise causal mask where VLM tokens attend to themselves, state tokens attend to vlm tokens and themselves and action tokens attend to everything. This ensures actions are influenced by the images, prompts and the current robot joint states.
+
+<p align="center">
+  <img src="https://rohitbandaru.github.io/assets/img/blog/vla/pi0.png" width="600"/>
+  <br/>
+  <a href="https://arxiv.org/pdf/2410.24164v1">Source</a>
+</p>
 
 ## References
 
