@@ -61,3 +61,18 @@ This follows the same principle as the flow matching model above, but instead of
 - [Denoising Diffusion Probabilistic Models (Ho et al., 2020)](https://arxiv.org/abs/2006.11239)
 - [Flow Matching for Generative Modeling (Lipman et al., 2023)](https://arxiv.org/abs/2210.02747)
 - [Pi0: A Vision-Language-Action Flow Model for General Robot Control (Black et al., 2024)](https://arxiv.org/abs/2410.24164)
+
+## Results
+
+### DDPM
+<img src="assets/ddpm_samples.png" width="400">
+
+### Flow Matching
+<img src="assets/flow_matching_output.png" width="600">
+
+### Pi0
+Trained on [ALOHA sim insertion](https://huggingface.co/datasets/lerobot/aloha_sim_insertion_human) dataset (10 epochs, batch size 2).
+
+Predicted (dashed) vs ground truth (solid) action trajectories across different frames (kinda follows the ground truth with less training):
+
+<img src="assets/pi0_actions.png" width="700">
