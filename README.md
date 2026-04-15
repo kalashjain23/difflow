@@ -19,6 +19,7 @@ There are scripts in the `examples/` folder that you can run to train and sample
 | Model | Train | Sample |
 |-------|-------|--------|
 | DDPM | `python3 examples/train_ddpm.py` | `python3 examples/sample_ddpm.py` |
+| DDIM | (reuse DDPM checkpoint) | `python3 examples/sample_ddim.py` |
 | Flow Matching | `python3 examples/train_flow_matching.py` | `python3 examples/sample_flow_matching.py` |
 | Pi0 | `python3 examples/train_pi0.py` | `python3 examples/sample_pi0.py` |
 
@@ -34,6 +35,16 @@ DDPM (Denoising Diffusion Probabilistic Model) follows a forward noising process
   <img src="https://developer-blogs.nvidia.com/wp-content/uploads/2022/04/Generation-with-Diffusion-Models.png" width="600"/>
   <br/>
   <a href="https://developer.nvidia.com/blog/improving-diffusion-models-as-an-alternative-to-gans-part-2/">Source</a>
+</p>
+
+### [DDIM](difflow/models/ddim.py)
+
+DDIM (Denoising Diffusion Implicit Model) is just a sampler swap for DDPM. In DDIM, we predict the clean image from the current noise level (in DDPM, we predicted the image at the next time step not the final time step) and then add back the predicted noise. This sounds deterministic right? It is, as there is no random noise added which allows DDIM to sample much faster (10x-20x) than DDPM and achieve similar results.
+
+<p align="center">
+  <img src="assets/ddim.png" width="600"/>
+  <br/>
+  <a href="https://youtu.be/6-gp8fR9r8w?si=Cc_mBj8sla1jjgAa&t=1098">Source</a>
 </p>
 
 ### [Flow Matching](difflow/models/flow_matching.py) (2D data distribution)
@@ -66,6 +77,9 @@ This follows the same principle as the flow matching model above, but instead of
 
 ### DDPM
 <img src="assets/ddpm_samples.png" width="400">
+
+### DDIM
+<img src="assets/ddim_samples.png" width="400">
 
 ### Flow Matching
 <img src="assets/flow_matching_output.png" width="600">
